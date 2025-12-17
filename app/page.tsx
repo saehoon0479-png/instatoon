@@ -77,20 +77,51 @@ export default function Home() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   };
+const savePNG = () => {
+  const canvas = canvasRef.current;
+  if (!canvas) return;
+
+  const temp = document.createElement("canvas");
+  temp.width = canvas.width;
+  temp.height = canvas.height;
+
+  const tctx = temp.getContext("2d");
+  if (!tctx) return;
+
+  // 항상 흰 배경
+  tctx.fillStyle = "#ffffff";
+  tctx.fillRect(0, 0, temp.width, temp.height);
+
+  // 기존 그림 복사
+  tctx.drawImage(canvas, 0, 0);
+
+  temp.toBlob((blob) => {
+    if (!blob) return;
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "instatoon.png";
+    a.click();
+    URL.revokeObjectURL(url);
+
+    // 주소 업데이트
+    window.history.replaceState(null, "", `?saved=${Date.now()}`);
+  }, "image/png");
+};
 
   return (
     <main
-      style={{
-        width: "100vw",
-        height: "100vh",
-        background: "#1e1e1e",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        gap: 16,
-        padding: 16,
-      }}
-    >
+  style={{
+    width: "100vw",
+    height: "100vh",
+    background: dark ? "#0f0f0f" : "#f5f5f5",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  }}
+>
+
 
       {/* 왼쪽 툴바 */}
       <div
@@ -211,23 +242,25 @@ export default function Home() {
 
         <div style={{ fontSize: 12, color: "#aaa", marginTop: 6 }}>
           팁: 펜/지우개는 마우스 눌렀다 움직이면 됨
-        </div>
-        <button
-  onClick={() => setDark((v) => !v)}
+           <button onClick={savePNG}>저장 / 공유</button>
+</div>
+<button
+  onClick={() => setDark(v => !v)}
   style={{
     padding: "10px 12px",
     borderRadius: 10,
     border: "1px solid #444",
-    background: dark ? "#fff" : "#111",
-    color: dark ? "#111" : "#fff",
+    background: dark ? "#111" : "#fff",
+    color: dark ? "#fff" : "#111",
     cursor: "pointer",
     fontWeight: 700,
     width: "100%",
     marginTop: 8,
   }}
 >
-  {dark ? "화이트모드" : "다크모드"}
+  {dark ? "화이트 UI" : "다크 UI"}
 </button>
+
 
       </div>
 
@@ -244,10 +277,10 @@ export default function Home() {
     width={800}
     height={800}
     style={{
-      background: dark ? "#111" : "white",
-      borderRadius: 12,
-      touchAction: "none",
-    }}
+     background: "white",
+  borderRadius: 12,
+  touchAction: "none",
+}}
     onPointerDown={(e) => {
       (e.target as HTMLCanvasElement).setPointerCapture(e.pointerId);
       startDrawing(e as any);
