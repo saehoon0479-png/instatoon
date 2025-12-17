@@ -12,6 +12,7 @@ export default function Home() {
   const [color, setColor] = useState("#000000");
   const [penSize, setPenSize] = useState(4);
   const [eraserSize, setEraserSize] = useState(18);
+  const [dark, setDark] = useState(true);
 
   const size = useMemo(() => (tool === "pen" ? penSize : eraserSize), [tool, penSize, eraserSize]);
 
@@ -90,6 +91,7 @@ export default function Home() {
         padding: 16,
       }}
     >
+
       {/* 왼쪽 툴바 */}
       <div
         style={{
@@ -210,27 +212,51 @@ export default function Home() {
         <div style={{ fontSize: 12, color: "#aaa", marginTop: 6 }}>
           팁: 펜/지우개는 마우스 눌렀다 움직이면 됨
         </div>
+        <button
+  onClick={() => setDark((v) => !v)}
+  style={{
+    padding: "10px 12px",
+    borderRadius: 10,
+    border: "1px solid #444",
+    background: dark ? "#fff" : "#111",
+    color: dark ? "#111" : "#fff",
+    cursor: "pointer",
+    fontWeight: 700,
+    width: "100%",
+    marginTop: 8,
+  }}
+>
+  {dark ? "화이트모드" : "다크모드"}
+</button>
+
       </div>
 
-      {/* 캔버스 */}
-      <canvas
-        ref={canvasRef}
-        width={800}
-        height={800}
-        style={{
-          background: "white",
-          borderRadius: "12px",
-          cursor: tool === "pen" ? "crosshair" : "cell",
-          touchAction: "none",
-        }}
-       onPointerDown={(e) => {
-  (e.target as HTMLElement).setPointerCapture(e.pointerId);
-  startDrawing(e as any);
-}}
-onPointerMove={(e) => draw(e as any)}
-onPointerUp={stopDrawing}
-onPointerLeave={stopDrawing}
-      />
+      <div
+  style={{
+    flex: 1,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  }}
+>
+  <canvas
+    ref={canvasRef}
+    width={800}
+    height={800}
+    style={{
+      background: dark ? "#111" : "white",
+      borderRadius: 12,
+      touchAction: "none",
+    }}
+    onPointerDown={(e) => {
+      (e.target as HTMLCanvasElement).setPointerCapture(e.pointerId);
+      startDrawing(e as any);
+    }}
+    onPointerMove={(e) => draw(e as any)}
+    onPointerUp={stopDrawing}
+    onPointerLeave={stopDrawing}
+  />
+</div>
     </main>
   );
 }
