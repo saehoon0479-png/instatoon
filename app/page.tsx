@@ -13,7 +13,8 @@ export default function Home() {
   const [penSize, setPenSize] = useState(4);
   const [eraserSize, setEraserSize] = useState(18);
   const [dark, setDark] = useState(true);
-
+  const [pointer, setPointer] = useState({ x: 0, y: 0 });
+  const [insideCanvas, setInsideCanvas] = useState(false);
   const size = useMemo(() => (tool === "pen" ? penSize : eraserSize), [tool, penSize, eraserSize]);
 
   useEffect(() => {
@@ -272,15 +273,28 @@ const savePNG = () => {
     alignItems: "center",
   }}
 >
+  <div
+  style={{ position: "relative", width: 800, height: 800 }}
+  onPointerEnter={() => setInsideCanvas(true)}
+  onPointerLeave={() => setInsideCanvas(false)}
+  onPointerMove={(e) => {
+    const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+    setPointer({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    });
+  }}
+>
   <canvas
     ref={canvasRef}
     width={800}
     height={800}
     style={{
-     background: "white",
-  borderRadius: 12,
-  touchAction: "none",
-}}
+      background: "white",   // ✅ 도화지는 항상 흰색
+      borderRadius: 12,
+      touchAction: "none",
+      cursor: "none",        // ✅ 기본 커서 숨김
+    }}
     onPointerDown={(e) => {
       (e.target as HTMLCanvasElement).setPointerCapture(e.pointerId);
       startDrawing(e as any);
@@ -289,6 +303,29 @@ const savePNG = () => {
     onPointerUp={stopDrawing}
     onPointerLeave={stopDrawing}
   />
+
+  {insideCanvas && (
+    <div
+      style={{
+        position: "absolute",
+        left: pointer.x,
+        top: pointer.y,
+        width: tool === "eraser" ? eraserSize : penSize,
+        height: tool === "eraser" ? eraserSize : penSize,
+        transform: "translate(-50%, -50%)",
+        borderRadius: "9999px",
+        pointerEvents: "none",
+        border:
+          tool === "eraser"
+            ? "2px solid #ff4d4f"
+            : "2px solid #333",
+        background: "transparent",
+        boxSizing: "border-box",
+      }}
+    />
+  )}
+</div>
+
 </div>
     </main>
   );
